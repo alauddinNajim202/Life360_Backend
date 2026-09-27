@@ -15,7 +15,7 @@ class CircleController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'color_theme' => 'nullable|string',
-            'icon' => 'nullable|string',
+            'icon' => 'nullable|image|mimes:jpeg,png,jpg,gif',
         ]);
 
         $user = auth()->user();

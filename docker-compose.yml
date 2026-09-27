@@ -23,7 +23,7 @@ services:
     container_name: family_db
     restart: always
     ports:
-      - "3306:3306"
+      - "3307:3306"
     environment:
       MYSQL_DATABASE: ${DB_DATABASE:-family_manager}
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
