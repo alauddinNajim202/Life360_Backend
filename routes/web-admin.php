@@ -1,49 +1,40 @@
 <?php
 
-
 use App\Http\Controllers\Web\Backend\Access\PermissionController;
 use App\Http\Controllers\Web\Backend\Access\RoleController;
 use App\Http\Controllers\Web\Backend\Access\UserController;
-use App\Http\Controllers\Web\Backend\AttributeController;
-
 use App\Http\Controllers\Web\Backend\CategoryController;
 use App\Http\Controllers\Web\Backend\ChatController;
-
-
-use App\Http\Controllers\Web\Backend\Settings\ProfileController;
-use App\Http\Controllers\Web\Backend\Settings\MailSettingController;
-use App\Http\Controllers\Web\Backend\Settings\SettingController;
-use App\Http\Controllers\Web\Backend\Settings\SocialController;
-use App\Http\Controllers\Web\Backend\Settings\GoogleMapController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Web\Backend\CMS\Web\About\AboutController;
+use App\Http\Controllers\Web\Backend\CMS\Web\About\MissionController;
+use App\Http\Controllers\Web\Backend\CMS\Web\About\TeamController;
+use App\Http\Controllers\Web\Backend\CMS\Web\Crypto\CryptoCmsController;
+use App\Http\Controllers\Web\Backend\CMS\Web\Footer\FooterController;
 use App\Http\Controllers\Web\Backend\DashboardController;
 use App\Http\Controllers\Web\Backend\FaqController;
 use App\Http\Controllers\Web\Backend\FileManagerController;
-use App\Http\Controllers\Web\Backend\ImageController;
-
 use App\Http\Controllers\Web\Backend\PageController;
-
 use App\Http\Controllers\Web\Backend\ProductController;
-
-
+use App\Http\Controllers\Web\Backend\PropertyController;
+use App\Http\Controllers\Web\Backend\PushNotificationController;
+use App\Http\Controllers\Web\Backend\Settings\GoogleMapController;
 use App\Http\Controllers\Web\Backend\Settings\LogoController;
+use App\Http\Controllers\Web\Backend\Settings\MailSettingController;
 use App\Http\Controllers\Web\Backend\Settings\OtherController;
-
+use App\Http\Controllers\Web\Backend\Settings\ProfileController;
+use App\Http\Controllers\Web\Backend\Settings\SettingController;
+use App\Http\Controllers\Web\Backend\Settings\SocialController;
 use App\Http\Controllers\Web\Backend\SocialLinkController;
 use App\Http\Controllers\Web\Backend\SubcategoryController;
 use App\Http\Controllers\Web\Backend\SubscriberController;
 use App\Http\Controllers\Web\Backend\TemplateEmailController;
 use App\Http\Controllers\Web\Backend\TransactionController;
-
-use App\Http\Controllers\Web\Backend\ReportController;;
-
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Route;
 
-Route::get("admin/dashboard", [DashboardController::class, 'index'])->name('dashboard')->middleware(['role:admin|staff']);
+Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard')->middleware(['role:admin|staff']);
 
 Route::group(['middleware' => ['web-admin']], function () {
-
-
 
     Route::controller(TemplateEmailController::class)->prefix('template/email')->name('template.email.')->group(function () {
         Route::get('/', 'index')->name('index');
@@ -55,8 +46,6 @@ Route::group(['middleware' => ['web-admin']], function () {
         Route::delete('/delete/{id}', 'destroy')->name('destroy');
         Route::get('/status/{id}', 'status')->name('status');
     });
-
-
 
     Route::controller(CategoryController::class)->prefix('category')->name('category.')->group(function () {
         Route::get('/', 'index')->name('index');
@@ -91,11 +80,6 @@ Route::group(['middleware' => ['web-admin']], function () {
         Route::get('/status/{id}', 'status')->name('status');
     });
 
-
-
-
-
-
     Route::controller(PageController::class)->prefix('page')->name('page.')->group(function () {
         Route::get('/', 'index')->name('index');
         Route::get('/create', 'create')->name('create');
@@ -129,17 +113,10 @@ Route::group(['middleware' => ['web-admin']], function () {
 
     Route::get('subscriber', [SubscriberController::class, 'index'])->name('subscriber.index');
 
-
-
     Route::controller(TransactionController::class)->prefix('transaction')->name('transaction.')->group(function () {
         Route::get('/{user_id?}', 'index')->name('index');
         Route::get('/show/{id}', 'show')->name('show');
     });
-
-
-
-
-
 
     /*
     * CMSsetting/profile
@@ -147,12 +124,10 @@ Route::group(['middleware' => ['web-admin']], function () {
 
     Route::prefix('cms')->name('cms.')->group(function () {
 
-
-
-        //Crypto Store CMS
+        // Crypto Store CMS
         Route::prefix('crypto')->name('crypto_store.')->group(function () {
-            //Consolidated Crypto Page Content
-            Route::prefix('content')->name('banner.')->controller(\App\Http\Controllers\Web\Backend\CMS\Web\Crypto\CryptoCmsController::class)->group(function () {
+            // Consolidated Crypto Page Content
+            Route::prefix('content')->name('banner.')->controller(CryptoCmsController::class)->group(function () {
                 Route::get('/', 'index')->name('index');
                 Route::get('/create', 'create')->name('create');
                 Route::post('/', 'store')->name('store');
@@ -167,26 +142,26 @@ Route::group(['middleware' => ['web-admin']], function () {
             });
         });
 
-        //About Page CMS
+        // About Page CMS
         Route::prefix('about')->name('about.')->group(function () {
-            //About Section
-            Route::prefix('about')->name('about.')->controller(\App\Http\Controllers\Web\Backend\CMS\Web\About\AboutController::class)->group(function () {
+            // About Section
+            Route::prefix('about')->name('about.')->controller(AboutController::class)->group(function () {
                 Route::get('/', 'index')->name('index');
                 Route::get('/{id}/show', 'show')->name('show');
                 Route::put('/content', 'content')->name('content');
                 Route::get('/display', 'display')->name('display');
             });
 
-            //Mission Section
-            Route::prefix('mission')->name('mission.')->controller(\App\Http\Controllers\Web\Backend\CMS\Web\About\MissionController::class)->group(function () {
+            // Mission Section
+            Route::prefix('mission')->name('mission.')->controller(MissionController::class)->group(function () {
                 Route::get('/', 'index')->name('index');
                 Route::get('/{id}/show', 'show')->name('show');
                 Route::put('/content', 'content')->name('content');
                 Route::get('/display', 'display')->name('display');
             });
 
-            //Team Section
-            Route::prefix('team')->name('team.')->controller(\App\Http\Controllers\Web\Backend\CMS\Web\About\TeamController::class)->group(function () {
+            // Team Section
+            Route::prefix('team')->name('team.')->controller(TeamController::class)->group(function () {
                 Route::get('/', 'index')->name('index');
                 Route::get('/create', 'create')->name('create');
                 Route::post('/', 'store')->name('store');
@@ -201,10 +176,10 @@ Route::group(['middleware' => ['web-admin']], function () {
             });
         });
 
-        //Common Page CMS
+        // Common Page CMS
         Route::prefix('common')->name('common.')->group(function () {
-            //Footer Section
-            Route::prefix('footer')->name('footer.')->controller(\App\Http\Controllers\Web\Backend\CMS\Web\Footer\FooterController::class)->group(function () {
+            // Footer Section
+            Route::prefix('footer')->name('footer.')->controller(FooterController::class)->group(function () {
                 Route::get('/', 'index')->name('index');
                 Route::get('/{id}/show', 'show')->name('show');
                 Route::put('/content', 'content')->name('content');
@@ -228,7 +203,6 @@ Route::group(['middleware' => ['web-admin']], function () {
         Route::get('/seen/single/{chat_id}', 'seenSingle');
     });
 
-
     /*
     * Users Access Route
     */
@@ -248,7 +222,7 @@ Route::group(['middleware' => ['web-admin']], function () {
     *settings
     */
 
-    //! Route for Profile Settings
+    // ! Route for Profile Settings
     Route::controller(ProfileController::class)->group(function () {
         Route::get('setting/profile', 'index')->name('setting.profile.index');
         Route::put('setting/profile/update', 'UpdateProfile')->name('setting.profile.update');
@@ -256,9 +230,7 @@ Route::group(['middleware' => ['web-admin']], function () {
         Route::post('setting/profile/update/Picture', 'UpdateProfilePicture')->name('update.profile.picture');
     });
 
-
-
-    //! Route for Mail Settings
+    // ! Route for Mail Settings
     Route::controller(MailSettingController::class)->group(function () {
         Route::get('setting/mail', 'index')->name('setting.mail.index');
         Route::patch('setting/mail', 'update')->name('setting.mail.update');
@@ -266,36 +238,31 @@ Route::group(['middleware' => ['web-admin']], function () {
         Route::post('setting/send', 'send')->name('setting.mail.send');
     });
 
-
-
-
-    //! Route for Firebase Settings
+    // ! Route for Firebase Settings
     Route::controller(SocialController::class)->prefix('setting/social')->name('setting.social.')->group(function () {
         Route::get('/', 'index')->name('index');
         Route::patch('/update', 'update')->name('update');
     });
 
-    //! Route for Stripe Settings
+    // ! Route for Stripe Settings
     Route::controller(SettingController::class)->group(function () {
         Route::get('setting/general', 'index')->name('setting.general.index');
         Route::patch('setting/general', 'update')->name('setting.general.update');
     });
 
-    //! Route for Logo Settings
+    // ! Route for Logo Settings
     Route::controller(LogoController::class)->group(function () {
         Route::get('setting/logo', 'index')->name('setting.logo.index');
         Route::patch('setting/logo', 'update')->name('setting.logo.update');
     });
 
-    //! Route for Google Map Settings
+    // ! Route for Google Map Settings
     Route::controller(GoogleMapController::class)->group(function () {
         Route::get('setting/google/map', 'index')->name('setting.google.map.index');
         Route::patch('setting/google/map', 'update')->name('setting.google.map.update');
     });
 
-
-
-    //Ajax settings
+    // Ajax settings
     Route::prefix('setting/other')->name('setting.other')->group(function () {
         Route::get('/', [OtherController::class, 'index'])->name('.index');
         Route::get('/mail', [OtherController::class, 'mail'])->name('.mail');
@@ -310,13 +277,14 @@ Route::group(['middleware' => ['web-admin']], function () {
     // Run artisan commands for optimization and cache clearing
     Route::get('/optimize', function () {
         Artisan::call('system:clear-cache');
+
         return redirect()->back()->with('t-success', 'Message sent successfully');
     })->name('optimize');
 
     /*
     * Push Notification Route
     */
-    Route::controller(\App\Http\Controllers\Web\Backend\PushNotificationController::class)->prefix('push-notification')->name('push_notification.')->group(function () {
+    Route::controller(PushNotificationController::class)->prefix('push-notification')->name('push_notification.')->group(function () {
         Route::get('/', 'index')->name('index');
         Route::post('/send', 'send')->name('send');
     });
@@ -324,19 +292,19 @@ Route::group(['middleware' => ['web-admin']], function () {
     /*
     * Property Route
     */
-    Route::controller(\App\Http\Controllers\Web\Backend\PropertyController::class)->prefix('property')->name('property.')->group(function () {
+    Route::controller(PropertyController::class)->prefix('property')->name('property.')->group(function () {
         Route::get('/', 'index')->name('index');
         Route::post('/status/{id}', 'statusUpdate')->name('status');
         Route::delete('/destroy/{id}', 'destroy')->name('destroy');
     });
 });
 
-//livewire
+// livewire
 Route::get('livewire/crud', function () {
     return view('backend.layouts.livewire.index');
 })->name('livewire.crud.index');
 
-//File-Manager
+// File-Manager
 Route::get('file-manager', [FileManagerController::class, 'index'])->name('file-manager');
 Route::post('file-upload', [FileManagerController::class, 'upload']);
 Route::delete('file-delete/{file}', [FileManagerController::class, 'delete']);
