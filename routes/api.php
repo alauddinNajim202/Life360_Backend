@@ -131,6 +131,7 @@ use App\Http\Controllers\Api\CircleController;
 
 Route::middleware(['auth:api'])->prefix('circle')->group(function () {
     Route::post('/create', [CircleController::class, 'create']);
+    Route::get('/list', [CircleController::class, 'list']);
     Route::post('/invite-code', [CircleController::class, 'generateInvite']);
     Route::post('/join', [CircleController::class, 'joinCircle']);
     Route::get('/{circleId}/members', [CircleController::class, 'members']);

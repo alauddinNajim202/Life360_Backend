@@ -53,6 +53,21 @@ class CircleController extends Controller
         ], 201);
     }
 
+    public function list(Request $request)
+    {
+
+        $user = auth()->user();
+
+        $circles = $user->circles()->get();
+
+        return response()->json([
+            'data' => $circles,
+            'code' => 200,
+            'message' => 'Circles fetched successfully',
+            'success' => true,
+        ], 200);
+    }
+
     public function generateInvite(Request $request)
     {
         $request->validate([
