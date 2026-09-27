@@ -1,0 +1,47 @@
+name: Deploy to EC2 via Docker
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to EC2 Server
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: |
+            # Navigate to the project directory
+            cd ${{ secrets.PROJECT_PATH }} || exit 1
+            
+            # Fix directory permissions automatically
+            sudo chown -R $USER:$USER .
+            
+            # Pull latest changes from git
+            git config --global --add safe.directory ${{ secrets.PROJECT_PATH }}
+            git pull origin main
+            
+            # Free up space by removing unused docker images and cache
+            docker system prune -af
+            
+            # Rebuild the Docker image and start the container
+            docker compose up -d --build
+            
+            # Wait 15 seconds for MySQL database to fully boot up
+            sleep 15
+            
+            # Debug: Check if db container is running and check its logs
+            docker compose ps
+            docker compose logs db
+            
+            # Clear caches before migration to load new .env variables
+            docker compose exec -T app php artisan optimize:clear
+            
+            # Run database migrations
+            docker compose exec -T app php artisan migrate --force

@@ -1,0 +1,63 @@
+<?php
+
+namespace App\Notifications;
+
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Notification;
+
+class MoneyAddedNotification extends Notification
+{
+    use Queueable;
+
+    protected $userName;
+    protected $amount;
+
+    /**
+     * Create a new notification instance.
+     */
+    public function __construct($userName, $amount)
+    {
+        $this->userName = $userName;
+        $this->amount = $amount;
+    }
+
+    /**
+     * Get the notification's delivery channels.
+     *
+     * @return array<int, string>
+     */
+    public function via(object $notifiable): array
+    {
+        return ['database', \App\Channels\FirebaseChannel::class];
+    }
+
+    /**
+     * Get the array representation of the notification.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(object $notifiable): array
+    {
+        return [
+            'title' => 'Money Added',
+            'message' => "<b>{$this->userName}</b> deposited <b>৳{$this->amount}</b> to mess fund.",
+            'category' => 'Money & Cost',
+            'icon' => 'wallet'
+        ];
+    }
+
+    /**
+     * Get the push notification representation.
+     */
+    public function toFirebase(object $notifiable): array
+    {
+        return [
+            'title' => '💰 Fund Received',
+            'message' => "৳{$this->amount} has been credited to the mess fund by {$this->userName}.",
+            'category' => 'Money & Cost',
+            'icon' => 'wallet'
+        ];
+    }
+}

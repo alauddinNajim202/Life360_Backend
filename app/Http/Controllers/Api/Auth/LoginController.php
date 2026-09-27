@@ -1,0 +1,126 @@
+<?php
+
+namespace App\Http\Controllers\Api\Auth;
+
+use App\Helpers\Helper;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Controller;
+use App\Models\User;
+use Carbon\Carbon;
+use Exception;
+use App\Traits\ApiResponse;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
+use Throwable;
+
+class LoginController extends Controller
+{
+    public $select;
+    use ApiResponse;
+    public function __construct()
+    {
+        $this->select = ['id', 'name', 'email','phone', 'otp', 'avatar', 'otp_verified_at', 'last_activity_at'];
+    }
+
+    public function Login(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'email'    => 'required|exists:users,email',
+                'password' => 'required|string|min:6',
+            ]);
+
+            if ($validator->fails()) {
+                return $this->error($validator->errors()->first(), 'Validation failed', 422);
+            }
+
+            $user = User::where('email', $request->email)->first();
+
+            if (!$user) {
+                return $this->error(null, 'user is not active', 404);
+            }
+
+            // New member check: if plain_password exists, this is a new member
+            // if ($user->plain_password) {
+            //     // Check if they're providing the correct plain_password to actually login
+            //     if ($request->password === $user->plain_password) {
+            //         // Correct plain_password — clear it and proceed to login
+            //         $user->update(['plain_password' => null]);
+            //     } else {
+            //         // First attempt or wrong password — show them their password
+            //         return $this->success([
+            //             'is_new_member'  => true,
+            //             'phone'          => $user->phone,
+            //             'password'       => $user->plain_password,
+            //         ], 'You are a new member. Please login with the provided password.');
+            //     }
+            // }
+
+            //! Check the password
+            if (!Hash::check($request->password, $user->password)) {
+                return $this->error(null, 'Invalid password', 401);
+            }
+
+            //? Check if the email is verified before login is successful
+            if (!$user->otp_verified_at) {
+                return $this->error(null, 'Email not verified. Please verify your email before logging in.', 403);
+            }else{
+                $user->update([
+                    'otp'            => null,
+                    'otp_expires_at' => null,
+                    'reset_password_token' => null,
+                    'reset_password_token_expire_at' => null
+                ]);
+            }
+
+            $user->update([
+                'last_activity_at' => now(),
+            ]);
+
+            //* Generate token if email is verified
+            $token = auth('api')->login($user);
+
+            $data = User::select($this->select)->find(auth('api')->user()->id);
+
+
+            return $this->success([
+                'token_type' => 'bearer',
+                'token'      => $token,
+                'expires_in' => auth('api')->factory()->getTTL() * 60,
+                'data'       => $data,
+            ], 'Login successful', 200);
+
+        } catch (ValidationException $e) {
+
+
+            return $this->error(null, 'Validation failed', 422);
+        } catch (Throwable $e) {
+
+            return $this->error(null, 'Internal server error', 500);
+        }
+    }
+
+    public function refreshToken()
+    {
+        $refreshToken = auth('api')->refresh();
+
+        if (empty($refreshToken)) {
+            return $this->error(null, 'Failed to refresh the token.', 401);
+        }
+
+        return response()->json([
+            'status'     => true,
+            'message'    => 'Access token refreshed successfully.',
+            'code'       => 200,
+            'token_type' => 'bearer',
+            'token'      => $refreshToken,
+            'expires_in' => auth('api')->factory()->getTTL() * 60,
+            'data' => auth('api')->user()
+        ]);
+    }
+
+}
