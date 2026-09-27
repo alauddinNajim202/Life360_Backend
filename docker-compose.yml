@@ -4,8 +4,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: meal_manager_backend:latest
-    container_name: meal_manager_backend
+    image: family_backend:latest
+    container_name: family_backend
     restart: always
     ports:
       - "127.0.0.1:8000:80"
@@ -20,14 +20,14 @@ services:
 
   db:
     image: mysql:8.0
-    container_name: meal_manager_db
+    container_name: family_db
     restart: always
     ports:
       - "3306:3306"
     environment:
-      MYSQL_DATABASE: ${DB_DATABASE:-meal_manager}
+      MYSQL_DATABASE: ${DB_DATABASE:-family_manager}
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
-      MYSQL_USER: ${DB_USERNAME:-meal_user}
+      MYSQL_USER: ${DB_USERNAME:-family_user}
       MYSQL_PASSWORD: ${DB_PASSWORD:-password}
     volumes:
       - dbdata:/var/lib/mysql
