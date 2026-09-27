@@ -29,7 +29,7 @@ services:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
       MYSQL_USER: ${DB_USERNAME:-family_user}
       MYSQL_PASSWORD: ${DB_PASSWORD:-password}
-    vvolumes:
+    volumes:
       - family_dbdata:/var/lib/mysql
     networks:
       - app-network

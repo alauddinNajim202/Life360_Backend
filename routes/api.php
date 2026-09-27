@@ -1,9 +1,5 @@
 <?php
 
-use App\Models\User;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Route;
-
 use App\Http\Controllers\Api\Auth\LoginController;
 use App\Http\Controllers\Api\Auth\LogoutController;
 use App\Http\Controllers\Api\Auth\RegisterController;
@@ -11,6 +7,7 @@ use App\Http\Controllers\Api\Auth\ResetPasswordController;
 use App\Http\Controllers\Api\Auth\SocialLoginController;
 use App\Http\Controllers\Api\Auth\UserController;
 use App\Http\Controllers\Api\ChatController;
+use App\Http\Controllers\Api\FavouriteController;
 use App\Http\Controllers\Api\FirebaseTokenController;
 use App\Http\Controllers\Api\Frontend\CategoryController;
 use App\Http\Controllers\Api\Frontend\FaqController;
@@ -21,11 +18,9 @@ use App\Http\Controllers\Api\Frontend\SocialLinksController;
 use App\Http\Controllers\Api\Frontend\SubcategoryController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\PropertyController;
-use App\Http\Controllers\Api\FavouriteController;
-use App\Http\Controllers\Api\Frontend\MessController;
-use App\Http\Controllers\Api\Frontend\TransactionController;
+use Illuminate\Support\Facades\Route;
 
-//page
+// page
 Route::get('/page/home', [HomeController::class, 'index']);
 
 Route::get('/category', [CategoryController::class, 'index']);
@@ -35,8 +30,6 @@ Route::get('/social/links', [SocialLinksController::class, 'index']);
 Route::get('/settings', [SettingsController::class, 'index']);
 Route::get('/faq', [FaqController::class, 'index']);
 
-
-
 Route::get('dynamic/page', [PageController::class, 'index']);
 Route::get('dynamic/page/show/{slug}', [PageController::class, 'show']);
 
@@ -44,50 +37,34 @@ Route::get('/property-form-data', [PropertyController::class, 'getFormData']);
 
 Route::get('/location/list', [HomeController::class, 'divisions']);
 
-
-
-
 Route::middleware(['auth:api'])->controller(FavouriteController::class)->prefix('auth/property')->group(function () {
     Route::post('/favorite', 'toggleFavorite');
     Route::get('/favorite/list', 'favoritesList');
 });
 
-
-
-
-
-
-
 Route::group(['middleware' => 'guest:api'], function ($router) {
-    //register
+    // register
     Route::post('/register', [RegisterController::class, 'register']);
     Route::post('/verify/email', [RegisterController::class, 'VerifyEmail'])->name('verify.email');
     Route::post('/resend-otp', [RegisterController::class, 'ResendOtp']);
     Route::post('/verify-otp', [RegisterController::class, 'VerifyEmail']);
-    //login
+    // login
     Route::post('login', [LoginController::class, 'login'])->name('api.login');
-    //forgot password
+    // forgot password
     Route::post('/forget-password', [ResetPasswordController::class, 'forgotPassword']);
     Route::post('/verify-otp-code', [ResetPasswordController::class, 'MakeOtpToken']);
     Route::post('/reset-password', [ResetPasswordController::class, 'ResetPassword']);
-    //social login
+    // social login
     Route::post('/social-login', [SocialLoginController::class, 'SocialLogin']);
 });
 
-
-
 Route::group(['middleware' => ['auth:api', 'api-otp']], function ($router) {
-
 
     Route::get('/refresh-token', [LoginController::class, 'refreshToken']);
     Route::post('/logout', [LogoutController::class, 'logout']);
 
-
-
     Route::get('/profile/information', [UserController::class, 'me']);
     Route::post('/update-profile', [UserController::class, 'updateProfile']);
-
-
 
     Route::post('/update-avatar', [UserController::class, 'updateAvatar']);
     Route::delete('/delete-profile', [UserController::class, 'destroy']);
@@ -101,10 +78,10 @@ Route::group(['middleware' => ['auth:api', 'api-otp']], function ($router) {
 */
 
 Route::middleware(['auth:api'])->controller(FirebaseTokenController::class)->prefix('firebase')->group(function () {
-    Route::get("test", "test");
-    Route::post("token/add", "store");
-    Route::post("token/get", "getToken");
-    Route::post("token/delete", "deleteToken");
+    Route::get('test', 'test');
+    Route::post('token/add', 'store');
+    Route::post('token/get', 'getToken');
+    Route::post('token/delete', 'deleteToken');
 });
 
 /*
@@ -142,19 +119,19 @@ Route::middleware(['auth:api'])->controller(ChatController::class)->prefix('auth
 
 Route::prefix('cms')->name('cms.')->group(function () {
     Route::get('home', [HomeController::class, 'index'])->name('home');
-    Route::get('about', [\App\Http\Controllers\Api\AboutController::class, 'index'])->name('about');
+    Route::get('about', [AboutController::class, 'index'])->name('about');
     Route::get('footer', [HomeController::class, 'footer'])->name('common');
 });
-
 
 // =====================
 // Family Tracker Routes
 // =====================
+use App\Http\Controllers\Api\AboutController;
 use App\Http\Controllers\Api\CircleController;
 
 Route::middleware(['auth:api'])->prefix('circle')->group(function () {
     Route::post('/create', [CircleController::class, 'create']);
-    Route::post('/{circleId}/invite', [CircleController::class, 'generateInvite']);
+    Route::post('/invite-code', [CircleController::class, 'generateInvite']);
     Route::post('/join', [CircleController::class, 'joinCircle']);
     Route::get('/{circleId}/members', [CircleController::class, 'members']);
 });

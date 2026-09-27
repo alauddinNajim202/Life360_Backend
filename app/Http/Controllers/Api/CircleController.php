@@ -51,11 +51,14 @@ class CircleController extends Controller
         ], 201);
     }
 
-    public function generateInvite(Request $request, $circleId)
+    public function generateInvite(Request $request)
     {
-        $request->validate(['relation_tag' => 'required|string']);
+        $request->validate([
+            'circle_id' => 'required|exists:circles,id',
+            'relation_tag' => 'required|string',
+        ]);
 
-        $circle = Circle::findOrFail($circleId);
+        $circle = Circle::findOrFail($request->circle_id);
 
         // Ensure only admin/owner can generate invite
         if ($circle->owner_id !== auth()->id()) {
