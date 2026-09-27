@@ -2,38 +2,38 @@
 
 namespace App\Http\Controllers\Api\Auth;
 
-use Exception;
-use Carbon\Carbon;
-use App\Models\User;
 use App\Helpers\Helper;
-use App\Traits\SMS;
+use App\Http\Controllers\Controller;
+use App\Mail\OtpMail;
+use App\Models\User;
 use App\Traits\ApiResponse;
-use Illuminate\Support\Str;
+use App\Traits\SMS;
+use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\OtpMail;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class RegisterController extends Controller
 {
-    use SMS, ApiResponse;
+    use ApiResponse, SMS;
 
     protected array $select;
 
     public function __construct()
     {
-        $this->select = ['id', 'name', 'email','phone', 'otp', 'avatar', 'otp_verified_at', 'last_activity_at'];
+        $this->select = ['id', 'name', 'email', 'phone', 'otp', 'avatar', 'otp_verified_at', 'last_activity_at'];
     }
 
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name'     => 'required|string|max:100',
-            'phone'    => 'required|string|max:15|unique:users',
-            'email'    => 'nullable|email|max:255',
+            'name' => 'required|string|max:100',
+            'email' => 'required|email|max:255|unique:users,email',
+            'phone' => 'required|string|max:15|unique:users',
             'password' => 'required|string|min:6|confirmed',
         ]);
 
@@ -45,13 +45,13 @@ class RegisterController extends Controller
             DB::beginTransaction();
 
             $user = User::create([
-                'name'            => $request->name,
-                'slug'            => Str::slug($request->name) . '-' . uniqid(),
-                'email'           => $request->email,
-                'phone'           => $request->phone,
-                'password'        => Hash::make($request->password),
-                'otp'             => rand(1000, 9999),
-                'otp_expires_at'  => now()->addMinutes(5),
+                'name' => $request->name,
+                'slug' => Str::slug($request->name).'-'.uniqid(),
+                'email' => $request->email,
+                'phone' => $request->phone,
+                'password' => Hash::make($request->password),
+                'otp' => rand(1000, 9999),
+                'otp_expires_at' => now()->addMinutes(5),
                 'otp_verified_at' => null,
             ]);
 
@@ -61,19 +61,18 @@ class RegisterController extends Controller
             //     \App\Helpers\SmsHelper::send($user->phone, $message);
             // }
 
-        
             // email sent
-            if (!empty($user->email)) {
-                Mail::to($user->email)->send(new OtpMail($user->otp , $user , 'Verify Your OTP'));
+            if (! empty($user->email)) {
+                Mail::to($user->email)->send(new OtpMail($user->otp, $user, 'Verify Your OTP'));
             }
-        
-        
+
             DB::commit();
 
             return $this->success($user->only($this->select), 'User registered successfully. Please verify your phone number.', 200);
 
         } catch (Exception $e) {
             DB::rollBack();
+
             return Helper::jsonErrorResponse('User registration failed', 500, [$e->getMessage()]);
         }
     }
@@ -82,7 +81,7 @@ class RegisterController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'email' => 'required|string|exists:users,email',
-            'otp'   => 'required|digits:4',
+            'otp' => 'required|digits:4',
         ]);
 
         if ($validator->fails()) {
@@ -92,7 +91,7 @@ class RegisterController extends Controller
         try {
             $user = User::where('email', $request->email)->first();
 
-            if ($user->otp_verified_at) {   
+            if ($user->otp_verified_at) {
                 return $this->error(null, 'Email already verified.', 409);
             }
 
@@ -106,21 +105,17 @@ class RegisterController extends Controller
 
             $user->update([
                 'otp_verified_at' => now(),
-                'otp'             => null,
-                'otp_expires_at'  => null,
+                'otp' => null,
+                'otp_expires_at' => null,
             ]);
 
             $token = auth('api')->login($user);
-            
-
-
-
 
             return $this->success([
                 'token_type' => 'bearer',
-                'token'      => $token,
+                'token' => $token,
                 'expires_in' => auth('api')->factory()->getTTL() * 60,
-                'data'       => $user->only($this->select)
+                'data' => $user->only($this->select),
             ], 'Phone verified successfully', 200);
 
         } catch (Exception $e) {
@@ -146,15 +141,15 @@ class RegisterController extends Controller
             }
 
             $newOtp = rand(1000, 9999);
-            
+
             $user->update([
-                'otp'            => $newOtp,
+                'otp' => $newOtp,
                 'otp_expires_at' => now()->addMinutes(5),
             ]);
 
             // Send the new OTP to the user's email
-            if (!empty($user->email)) {
-                Mail::to($user->email)->send(new OtpMail($user->otp , $user , 'Verify Your OTP'));
+            if (! empty($user->email)) {
+                Mail::to($user->email)->send(new OtpMail($user->otp, $user, 'Verify Your OTP'));
             }
 
             return $this->success($user->only($this->select), 'A new OTP has been sent to your email.', 200);

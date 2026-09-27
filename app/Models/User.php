@@ -3,22 +3,22 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 use Tymon\JWTAuth\Contracts\JWTSubject;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class User extends Authenticatable implements JWTSubject
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasRoles, SoftDeletes;
+    /** @use HasFactory<UserFactory> */
+    use HasFactory, HasRoles, Notifiable, SoftDeletes;
 
     protected $guard_name = ['api', 'web'];
 
-
-    protected $guarded = [];
+    protected $guarded = ['id'];
 
     public function readNews()
     {
@@ -26,6 +26,7 @@ class User extends Authenticatable implements JWTSubject
             ->withPivot('read_at')
             ->withTimestamps();
     }
+
     public function getJWTIdentifier()
     {
         return $this->getKey();
@@ -36,12 +37,11 @@ class User extends Authenticatable implements JWTSubject
         return [];
     }
 
-
-    public function getCoverImageAttribute($value): string|null
+    public function getCoverImageAttribute($value): ?string
     {
 
         return $value ? url($value) : null;
-        ;
+
     }
 
     /**
@@ -49,7 +49,6 @@ class User extends Authenticatable implements JWTSubject
      *
      * @var list<string>
      */
-
 
     /**
      * The attributes that should be hidden for serialization.
@@ -82,12 +81,12 @@ class User extends Authenticatable implements JWTSubject
         ];
     }
 
-    public function getAvatarAttribute($value): string|null
+    public function getAvatarAttribute($value): ?string
     {
         if (filter_var($value, FILTER_VALIDATE_URL)) {
             return $value;
         }
-        if (request()->is('api/*') && !empty($value)) {
+        if (request()->is('api/*') && ! empty($value)) {
             return url($value);
         }
 
@@ -103,6 +102,7 @@ class User extends Authenticatable implements JWTSubject
     {
         $increment = $this->transactions()->where('type', 'increment')->sum('amount');
         $decrement = $this->transactions()->where('type', 'decrement')->sum('amount');
+
         return $increment - $decrement;
     }
 
@@ -141,7 +141,7 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasMany(Product::class);
     }
 
-    //chat related methods
+    // chat related methods
     public function senders()
     {
         return $this->hasMany(Chat::class, 'sender_id');
@@ -171,7 +171,6 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(Favourite::class);
     }
-
 
     // =====================
     // Family Tracker Relationships

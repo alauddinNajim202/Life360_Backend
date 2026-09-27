@@ -88,9 +88,13 @@ class CircleController extends Controller
 
     public function joinCircle(Request $request)
     {
-        $request->validate(['invite_code' => 'required|string']);
+        $request->validate([
+            'circle_id' => 'required|exists:circles,id',
+            'invite_code' => 'required|string',
+        ]);
 
         $invite = CircleInvite::where('invite_code', $request->invite_code)
+            ->where('circle_id', $request->circle_id)
             ->where('is_used', false)
             ->where('expires_at', '>', now())
             ->first();
@@ -118,16 +122,37 @@ class CircleController extends Controller
         return response()->json([
             'message' => 'Successfully joined as '.$invite->relation_tag,
             'circle' => $invite->circle,
-        ]);
+            'code' => 201,
+            'success' => true,
+        ], 201);
     }
 
     public function members($circleId)
     {
         $circle = Circle::with('members')->findOrFail($circleId);
 
+        // Get only needed fields for members
+        $members = $circle->members->map(function ($member) {
+            return [
+                'id' => $member->id,
+                'name' => $member->name,
+                'email' => $member->email,
+                'phone' => $member->phone,
+                'avatar' => $member->avatar,
+                'role' => $member->pivot->role,
+                'relation_tag' => $member->pivot->relation_tag,
+                'joined_at' => $member->pivot->joined_at,
+            ];
+        });
+
         return response()->json([
-            'circle' => $circle->name,
-            'members' => $circle->members,
-        ]);
+            'message' => 'Circle members fetched successfully',
+            'data' => [
+                'circle' => $circle->name,
+                'members' => $members,
+            ],
+            'code' => 200,
+            'success' => true,
+        ], 200);
     }
 }

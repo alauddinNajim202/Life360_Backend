@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -24,7 +23,7 @@ class UserSeeder extends Seeder
                 ['id' => 6, 'name' => 'api update', 'slug' => 'api_update', 'guard_name' => 'api'],
                 ['id' => 7, 'name' => 'api delete', 'slug' => 'api_delete', 'guard_name' => 'api'],
                 ['id' => 8, 'name' => 'api view', 'slug' => 'api_view', 'guard_name' => 'api'],
-                ['id' => 9, 'name' => 'dev', 'slug' => 'dev', 'guard_name' => 'web']
+                ['id' => 9, 'name' => 'dev', 'slug' => 'dev', 'guard_name' => 'web'],
             ]);
 
             DB::table('roles')->insert([
@@ -67,7 +66,7 @@ class UserSeeder extends Seeder
                 ['permission_id' => 5, 'role_id' => 4],
                 ['permission_id' => 6, 'role_id' => 4],
                 ['permission_id' => 7, 'role_id' => 4],
-                ['permission_id' => 8, 'role_id' => 4]
+                ['permission_id' => 8, 'role_id' => 4],
             ]);
 
             DB::table('model_has_roles')->insert([
@@ -75,7 +74,7 @@ class UserSeeder extends Seeder
                 ['role_id' => 2, 'model_id' => 1, 'model_type' => 'App\Models\User'],
                 ['role_id' => 2, 'model_id' => 2, 'model_type' => 'App\Models\User'],
                 ['role_id' => 3, 'model_id' => 3, 'model_type' => 'App\Models\User'],
-                ['role_id' => 4, 'model_id' => 4, 'model_type' => 'App\Models\User']
+                ['role_id' => 4, 'model_id' => 4, 'model_type' => 'App\Models\User'],
             ]);
 
             DB::table('model_has_permissions')->insert([
@@ -94,29 +93,29 @@ class UserSeeder extends Seeder
                 ['permission_id' => 5, 'model_id' => 4, 'model_type' => 'App\Models\User'],
                 ['permission_id' => 6, 'model_id' => 4, 'model_type' => 'App\Models\User'],
                 ['permission_id' => 7, 'model_id' => 4, 'model_type' => 'App\Models\User'],
-                ['permission_id' => 8, 'model_id' => 4, 'model_type' => 'App\Models\User']
+                ['permission_id' => 8, 'model_id' => 4, 'model_type' => 'App\Models\User'],
             ]);
 
             for ($i = 5; $i <= 4; $i++) {
                 DB::table('users')->insert([
-                    'name' => 'User ' . $i,
-                    'slug' => 'user-' . $i,
-                    'email' => 'user' . $i . '@example.com',
+                    'name' => 'User '.$i,
+                    'slug' => 'user-'.$i,
+                    'email' => 'user'.$i.'@example.com',
                     'password' => Hash::make('12345678'),
                     'stripe_account_id' => 'acct_1RHGjbQPESrwz7hv',
-                    'otp_verified_at' => now()
+                    'otp_verified_at' => now(),
                 ]);
 
                 DB::table('profiles')->insert([
                     'user_id' => $i,
                     'dob' => '1990-01-01',
-                    'gender' => 'male'
+                    'gender' => 'male',
                 ]);
 
                 DB::table('model_has_roles')->insert([
                     'role_id' => 4,
                     'model_id' => $i,
-                    'model_type' => 'App\Models\User'
+                    'model_type' => 'App\Models\User',
                 ]);
             }
         }

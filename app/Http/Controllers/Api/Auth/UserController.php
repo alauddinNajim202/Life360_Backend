@@ -5,10 +5,10 @@ namespace App\Http\Controllers\Api\Auth;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Throwable;
@@ -16,10 +16,11 @@ use Throwable;
 class UserController extends Controller
 {
     public $select;
+
     public function __construct()
     {
         parent::__construct();
-        $this->select = ['id', 'name', 'phone', 'email','avatar'];
+        $this->select = ['id', 'name', 'phone', 'email', 'avatar'];
     }
 
     public function me()
@@ -37,21 +38,18 @@ class UserController extends Controller
             // Validate the request
             $validatedData = $request->validate([
 
-                'name'                            => 'nullable|string|max:255',
-                'phone'                           => 'nullable|string|max:255',
+                'name' => 'nullable|string|max:255',
+                'phone' => 'nullable|string|max:255',
                 // 'address'                         => 'nullable|string|max:255',
-                'avatar'                          => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240',
+                'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240',
 
             ]);
-
 
             $user->update([
-                'name'                     => $request->input('name') ?? $user->name,
-                'phone'                    => $request->input('phone') ?? $user->phone,
-                'address'                  => $request->input('address') ?? $user->address,
+                'name' => $request->input('name') ?? $user->name,
+                'phone' => $request->input('phone') ?? $user->phone,
+                'address' => $request->input('address') ?? $user->address,
             ]);
-
-
 
             if ($request->hasFile('avatar')) {
                 if ($user->avatar) {
@@ -68,6 +66,7 @@ class UserController extends Controller
             $user->save();
 
             $data = User::select($this->select)->find($user->id);
+
             return Helper::jsonResponse(true, 'Profile updated successfully', 200, $data);
         } catch (ValidationException $e) {
             DB::rollBack();
@@ -88,7 +87,6 @@ class UserController extends Controller
 
         $providedToken = $request->header('Authorization');
 
-
         if (str_starts_with($providedToken, 'Bearer ')) {
             $providedToken = substr($providedToken, 7);
         }
@@ -99,14 +97,14 @@ class UserController extends Controller
             return Helper::jsonResponse(false, 'Unauthorized', 401);
         }
 
-
         $user = User::role('admin')->latest('id')->first();
 
         $data = [
             'user_id' => $user->id,
-            'email'   => $user->email,
-            'role'    => 'editor',
+            'email' => $user->email,
+            'role' => 'editor',
         ];
+
         return Helper::jsonResponse(true, 'User details fetched successfully', 200, $data);
     }
 
@@ -138,10 +136,10 @@ class UserController extends Controller
             $data = User::select($this->select)->find($user->id);
 
             return response()->json([
-                'status'  => true,
-                'code'    => 200,
+                'status' => true,
+                'code' => 200,
                 'message' => 'Avatar updated successfully',
-                'data'    => $data,
+                'data' => $data,
             ], 200);
         } catch (ValidationException $e) {
             return Helper::jsonErrorResponse($e->errors(), 422);
@@ -181,8 +179,8 @@ class UserController extends Controller
             $data = User::select($this->select)->find($user->id);
 
             return response()->json([
-                'status'  => true,
-                'code'    => 200,
+                'status' => true,
+                'code' => 200,
                 'message' => 'Cover image updated successfully',
             ], 200);
         } catch (ValidationException $e) {
@@ -199,15 +197,16 @@ class UserController extends Controller
     {
         try {
             $request->validate([
-                'x_link'        => 'required|url',
+                'x_link' => 'required|url',
                 'linkedin_link' => 'required|url',
             ]);
 
-            $user           = auth('api')->user();
-            $user->x        = $request->x_link;
+            $user = auth('api')->user();
+            $user->x = $request->x_link;
             $user->linkedin = $request->linkedin_link;
             $user->save();
             $data = User::select($this->select)->find($user->id);
+
             return Helper::jsonResponse(true, 'Link updated successfully', 200);
         } catch (ValidationException $e) {
             return Helper::jsonErrorResponse($e->errors(), 422);
@@ -227,6 +226,7 @@ class UserController extends Controller
         }
         Auth::logout('api');
         $user->delete();
+
         return Helper::jsonResponse(true, 'Profile deleted successfully', 200);
     }
 
@@ -238,19 +238,19 @@ class UserController extends Controller
         }
         Auth::logout('api');
         $user->forceDelete();
+
         return Helper::jsonResponse(true, 'Profile deleted successfully', 200);
     }
-
 
     public function password_update(Request $request)
     {
         try {
             $validator = Validator::make($request->all(), [
                 'old_password' => 'required|string',
-                'password' => 'required|string|min:6|confirmed',
+                'password' => 'required|string|min:6',
             ]);
 
-            if($validator->fails()){
+            if ($validator->fails()) {
                 return Helper::jsonResponse(false, $validator->errors()->first(), 422);
             }
             $user = auth('api')->user();
@@ -260,6 +260,7 @@ class UserController extends Controller
             $user->password = Hash::make($request->password);
             $user->save();
             $data = User::select($this->select)->find($user->id);
+
             return Helper::jsonResponse(true, 'Password updated successfully', 200, $data);
         } catch (ValidationException $e) {
             return Helper::jsonErrorResponse($e->errors(), 422);
