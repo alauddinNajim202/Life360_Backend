@@ -48,7 +48,7 @@ class UserController extends Controller
             $user->update([
                 'name' => $request->input('name') ?? $user->name,
                 'phone' => $request->input('phone') ?? $user->phone,
-                'address' => $request->input('address') ?? $user->address,
+                // 'address' => $request->input('address') ?? $user->address,
             ]);
 
             if ($request->hasFile('avatar')) {

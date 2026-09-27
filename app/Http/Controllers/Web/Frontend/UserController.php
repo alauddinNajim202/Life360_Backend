@@ -13,18 +13,20 @@ class UserController extends Controller
         if (Auth::check()) {
             return redirect()->route('user.dashboard');
         }
+
         return view('frontend.user.login');
     }
 
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'phone' => ['required', 'exists:users,phone'],
+            'email' => ['required', 'exists:users,email'],
             'password' => ['required'],
         ]);
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
+
             return redirect()->intended(route('user.dashboard'));
         }
 
