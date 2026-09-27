@@ -46,8 +46,10 @@ class CircleController extends Controller
         ]);
 
         return response()->json([
+            'data' => $circle,
+            'code' => 201,
             'message' => 'Circle created successfully',
-            'circle' => $circle,
+            'success' => true,
         ], 201);
     }
 
@@ -77,9 +79,11 @@ class CircleController extends Controller
         ]);
 
         return response()->json([
+            'data' => $invite,
+            'code' => 201,
             'message' => 'Invite code generated',
-            'invite_code' => $invite->invite_code,
-        ]);
+            'success' => true,
+        ], 201);
     }
 
     public function joinCircle(Request $request)

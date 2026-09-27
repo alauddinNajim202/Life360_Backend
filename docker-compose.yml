@@ -39,4 +39,4 @@ networks:
     driver: bridge
 
 volumes:
-  dbdata:
+  family_dbdata:
