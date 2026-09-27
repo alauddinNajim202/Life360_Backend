@@ -2,16 +2,18 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Circle;
 use App\Models\CircleInvite;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class CircleController extends Controller
 {
     public function create(Request $request)
     {
+
         $request->validate([
             'name' => 'required|string|max:255',
             'color_theme' => 'nullable|string',
@@ -19,6 +21,15 @@ class CircleController extends Controller
         ]);
 
         $user = auth()->user();
+
+        if ($request->hasFile('icon')) {
+
+            $request->icon = Helper::fileUpload(
+                $request->file('icon'),
+                'circle',
+                getFileName($request->file('icon'))
+            );
+        }
 
         $circle = Circle::create([
             'name' => $request->name,
@@ -31,12 +42,12 @@ class CircleController extends Controller
         $circle->members()->attach($user->id, [
             'role' => 'admin',
             'relation_tag' => 'Owner',
-            'joined_at' => now()
+            'joined_at' => now(),
         ]);
 
         return response()->json([
             'message' => 'Circle created successfully',
-            'circle' => $circle
+            'circle' => $circle,
         ], 201);
     }
 
@@ -53,7 +64,7 @@ class CircleController extends Controller
 
         // Generate unique code (e.g: SIS-49X8)
         $prefix = strtoupper(substr($request->relation_tag, 0, 3));
-        $code = $prefix . '-' . strtoupper(Str::random(4));
+        $code = $prefix.'-'.strtoupper(Str::random(4));
 
         $invite = CircleInvite::create([
             'circle_id' => $circle->id,
@@ -64,7 +75,7 @@ class CircleController extends Controller
 
         return response()->json([
             'message' => 'Invite code generated',
-            'invite_code' => $invite->invite_code
+            'invite_code' => $invite->invite_code,
         ]);
     }
 
@@ -73,11 +84,11 @@ class CircleController extends Controller
         $request->validate(['invite_code' => 'required|string']);
 
         $invite = CircleInvite::where('invite_code', $request->invite_code)
-                              ->where('is_used', false)
-                              ->where('expires_at', '>', now())
-                              ->first();
+            ->where('is_used', false)
+            ->where('expires_at', '>', now())
+            ->first();
 
-        if (!$invite) {
+        if (! $invite) {
             return response()->json(['message' => 'Invalid or expired invite code!'], 400);
         }
 
@@ -92,14 +103,14 @@ class CircleController extends Controller
         $invite->circle->members()->attach($user->id, [
             'role' => 'member',
             'relation_tag' => $invite->relation_tag,
-            'joined_at' => now()
+            'joined_at' => now(),
         ]);
 
         $invite->update(['is_used' => true]);
 
         return response()->json([
-            'message' => 'Successfully joined as ' . $invite->relation_tag,
-            'circle' => $invite->circle
+            'message' => 'Successfully joined as '.$invite->relation_tag,
+            'circle' => $invite->circle,
         ]);
     }
 
@@ -109,7 +120,7 @@ class CircleController extends Controller
 
         return response()->json([
             'circle' => $circle->name,
-            'members' => $circle->members
+            'members' => $circle->members,
         ]);
     }
 }
