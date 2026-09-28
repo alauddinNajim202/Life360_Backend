@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('user_locations', function (Blueprint ) {
+        Schema::create('user_locations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->decimal('latitude', 10, 7);
@@ -24,3 +24,4 @@ return new class extends Migration
         Schema::dropIfExists('user_locations');
     }
 };
+
