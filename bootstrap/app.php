@@ -2,14 +2,15 @@
 
 use App\Helpers\Helper;
 use App\Http\Middleware\ApiAdminMiddleware;
-use App\Http\Middleware\WebAdminMiddleware;
-use App\Http\Middleware\WebAuthCheckMiddleware;
 use App\Http\Middleware\ApiCustomerMiddleware;
-use App\Http\Middleware\WebDeveloperMiddleware;
 use App\Http\Middleware\ApiOtpVerifiedMiddleware;
-use App\Http\Middleware\WebOtpVerifiedMiddleware;
 use App\Http\Middleware\ApiRetailerMiddleware;
 use App\Http\Middleware\MessManagerMiddleware;
+use App\Http\Middleware\MessOwnerMiddleware;
+use App\Http\Middleware\WebAdminMiddleware;
+use App\Http\Middleware\WebAuthCheckMiddleware;
+use App\Http\Middleware\WebDeveloperMiddleware;
+use App\Http\Middleware\WebOtpVerifiedMiddleware;
 use App\Http\Middleware\WebStaffMiddleware;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
@@ -27,10 +28,10 @@ use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
-        web: __DIR__ . '/../routes/web.php',
-        api: __DIR__ . '/../routes/api.php',
-        commands: __DIR__ . '/../routes/console.php',
-        channels: __DIR__ . '/../routes/channels.php',
+        web: __DIR__.'/../routes/web.php',
+        api: __DIR__.'/../routes/api.php',
+        commands: __DIR__.'/../routes/console.php',
+        channels: __DIR__.'/../routes/channels.php',
         health: '/up',
         then: function () {
             Route::middleware(['web'])->prefix('ajax')->name('ajax.')->group(base_path('routes/ajax.php'));
@@ -41,29 +42,32 @@ return Application::configure(basePath: dirname(__DIR__))
             Route::middleware(['api', 'otp', 'api-customer'])->prefix('api/customer')->name('api.customer.')->group(base_path('routes/api-customer.php'));
             Route::middleware(['api'])->group(base_path('routes/api-stripe.php'));
             require base_path('routes/cmd.php');
-            
+
         }
     )
     ->withBroadcasting(
-        __DIR__ . '/../routes/channels.php',
-        ['prefix' => 'api', 'middleware' => ['auth:api']],
+        __DIR__.'/../routes/channels.php',
+        [
+            'prefix' => 'api',
+            'middleware' => ['auth:api'],
+        ]
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
-            'web-developer'         => WebDeveloperMiddleware::class,
-            'web-admin'             => WebAdminMiddleware::class,
-            'web-staff'             => WebStaffMiddleware::class,
-            'api-admin'             => ApiAdminMiddleware::class,
-            'api-customer'          => ApiCustomerMiddleware::class,
-            'api-retailer'          => ApiRetailerMiddleware::class,
-            'api-otp'               => ApiOtpVerifiedMiddleware::class,
-            'web-otp'               => WebOtpVerifiedMiddleware::class,
-            'check'                 => WebAuthCheckMiddleware::class,
-            'role'                  => RoleMiddleware::class,
-            'permission'            => PermissionMiddleware::class,
-            'role_or_permission'    => RoleOrPermissionMiddleware::class,
-            'mess.manager'          => MessManagerMiddleware::class,
-            'mess.owner'            => \App\Http\Middleware\MessOwnerMiddleware::class,
+            'web-developer' => WebDeveloperMiddleware::class,
+            'web-admin' => WebAdminMiddleware::class,
+            'web-staff' => WebStaffMiddleware::class,
+            'api-admin' => ApiAdminMiddleware::class,
+            'api-customer' => ApiCustomerMiddleware::class,
+            'api-retailer' => ApiRetailerMiddleware::class,
+            'api-otp' => ApiOtpVerifiedMiddleware::class,
+            'web-otp' => WebOtpVerifiedMiddleware::class,
+            'check' => WebAuthCheckMiddleware::class,
+            'role' => RoleMiddleware::class,
+            'permission' => PermissionMiddleware::class,
+            'role_or_permission' => RoleOrPermissionMiddleware::class,
+            'mess.manager' => MessManagerMiddleware::class,
+            'mess.owner' => MessOwnerMiddleware::class,
         ]);
         $middleware->validateCsrfTokens(except: [
             'payment/stripe/webhook',

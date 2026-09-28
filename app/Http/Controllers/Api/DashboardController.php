@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
+use App\Models\Deposit;
+use App\Models\Expense;
 use App\Models\Meal;
 use App\Models\Mess;
-use App\Models\Expense;
-use App\Models\Deposit;
-use Carbon\Carbon;
 use App\Traits\ApiResponse;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 
 class DashboardController extends Controller
 {
@@ -19,13 +19,13 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
 
-        if (!$user->current_mess_id) {
+        if (! $user->current_mess_id) {
             return $this->error(null, 'No active mess selected.', 400);
         }
 
         $messId = $user->current_mess_id;
-        $month  = $request->month ?? Carbon::now()->month;
-        $year   = $request->year  ?? Carbon::now()->year;
+        $month = $request->month ?? Carbon::now()->month;
+        $year = $request->year ?? Carbon::now()->year;
 
         $mess = Mess::find($messId);
 
@@ -33,7 +33,7 @@ class DashboardController extends Controller
         $totalMembers = $mess->users()->count();
 
         // Today's Total Meals
-        $todayMeals      = Meal::where('mess_id', $messId)->whereDate('date', Carbon::today())->get();
+        $todayMeals = Meal::where('mess_id', $messId)->whereDate('date', Carbon::today())->get();
         $totalTodayMeals = $todayMeals->sum('breakfast') + $todayMeals->sum('lunch') + $todayMeals->sum('dinner');
 
         // This Month's Totals
@@ -43,7 +43,7 @@ class DashboardController extends Controller
         $totalDeposits = Deposit::where('mess_id', $messId)
             ->whereMonth('date', $month)->whereYear('date', $year)->sum('amount');
 
-        $monthMeals      = Meal::where('mess_id', $messId)
+        $monthMeals = Meal::where('mess_id', $messId)
             ->whereMonth('date', $month)->whereYear('date', $year)->get();
         $totalMonthMeals = $monthMeals->sum('breakfast') + $monthMeals->sum('lunch') + $monthMeals->sum('dinner');
 
@@ -51,14 +51,15 @@ class DashboardController extends Controller
         $mealRate = $totalMonthMeals > 0 ? round($totalExpenses / $totalMonthMeals, 2) : 0;
 
         return $this->success([
-            'mess'                => ['id' => $mess->id, 'name' => $mess->name],
-            'total_members'       => $totalMembers,
-            'today_meals'         => $totalTodayMeals,
-            'monthly_expenses'    => $totalExpenses,
-            'monthly_deposits'    => $totalDeposits,
+
+            'mess' => ['id' => $mess->id, 'name' => $mess->name],
+            'total_members' => $totalMembers,
+            'today_meals' => $totalTodayMeals,
+            'monthly_expenses' => $totalExpenses,
+            'monthly_deposits' => $totalDeposits,
             'monthly_total_meals' => $totalMonthMeals,
-            'current_meal_rate'   => $mealRate,
+            'current_meal_rate' => $mealRate,
+
         ], 'Dashboard data fetched', 200);
     }
 }
-

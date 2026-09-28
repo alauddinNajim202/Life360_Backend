@@ -170,4 +170,109 @@ class CircleController extends Controller
             'success' => true,
         ], 200);
     }
+
+    public function updateCircle(Request $request, $circleId)
+    {
+        $request->validate([
+            'name' => 'nullable|string|max:255',
+            'color_theme' => 'nullable|string',
+            'icon' => 'nullable|image|mimes:jpeg,png,jpg,gif',
+        ]);
+
+        $circle = Circle::findOrFail($circleId);
+
+        if ($circle->owner_id !== auth()->id()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        if ($request->hasFile('icon')) {
+            $request->icon = Helper::fileUpload(
+                $request->file('icon'),
+                'circle',
+                getFileName($request->file('icon'))
+            );
+            $circle->icon = $request->icon;
+        }
+
+        if ($request->name) $circle->name = $request->name;
+        if ($request->color_theme) $circle->color_theme = $request->color_theme;
+
+        $circle->save();
+
+        return response()->json([
+            'data' => $circle,
+            'code' => 200,
+            'message' => 'Circle updated successfully',
+            'success' => true,
+        ], 200);
+    }
+
+    public function leaveCircle($circleId)
+    {
+        $circle = Circle::findOrFail($circleId);
+        $user = auth()->user();
+
+        if ($circle->owner_id === $user->id) {
+            return response()->json(['message' => 'Owner cannot leave the circle. Delete the circle instead.'], 400);
+        }
+
+        if (!$circle->members()->where('user_id', $user->id)->exists()) {
+            return response()->json(['message' => 'You are not a member of this circle'], 400);
+        }
+
+        $circle->members()->detach($user->id);
+
+        return response()->json([
+            'code' => 200,
+            'message' => 'You have left the circle',
+            'success' => true,
+        ], 200);
+    }
+
+    public function kickMember($circleId, $userId)
+    {
+        $circle = Circle::findOrFail($circleId);
+
+        if ($circle->owner_id !== auth()->id()) {
+            return response()->json(['message' => 'Only the owner can kick members'], 403);
+        }
+
+        if ((int)$userId === auth()->id()) {
+            return response()->json(['message' => 'You cannot kick yourself'], 400);
+        }
+
+        if (!$circle->members()->where('user_id', $userId)->exists()) {
+            return response()->json(['message' => 'User is not a member of this circle'], 400);
+        }
+
+        $circle->members()->detach($userId);
+
+        return response()->json([
+            'code' => 200,
+            'message' => 'Member kicked successfully',
+            'success' => true,
+        ], 200);
+    }
+
+    public function deleteCircle($circleId)
+    {
+        $circle = Circle::findOrFail($circleId);
+
+        if ($circle->owner_id !== auth()->id()) {
+            return response()->json(['message' => 'Only the owner can delete the circle'], 403);
+        }
+
+        // Detach all members
+        $circle->members()->detach();
+        // Delete related invites
+        CircleInvite::where('circle_id', $circleId)->delete();
+        // Delete the circle
+        $circle->delete();
+
+        return response()->json([
+            'code' => 200,
+            'message' => 'Circle deleted successfully',
+            'success' => true,
+        ], 200);
+    }
 }

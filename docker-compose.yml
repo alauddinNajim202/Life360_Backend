@@ -18,6 +18,21 @@ services:
     networks:
       - app-network
 
+  reverb:
+    image: family_backend:latest
+    container_name: family_reverb
+    restart: always
+    command: php artisan reverb:start --host="0.0.0.0" --port=8082
+    ports:
+      - "8082:8082"
+    volumes:
+      - ./.env:/var/www/html/.env
+    depends_on:
+      - db
+      - app
+    networks:
+      - app-network
+
   db:
     image: mysql:8.0
     container_name: family_db
