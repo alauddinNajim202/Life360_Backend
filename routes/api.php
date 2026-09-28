@@ -131,6 +131,7 @@ Route::middleware(['auth:api'])
     ->group(function () {
         Route::post('/create', [CircleController::class, 'create']);
         Route::get('/list', [CircleController::class, 'list']);
+        Route::get('/all-members-location', [CircleController::class, 'allMembersLocation']);
         Route::post('/invite-code', [CircleController::class, 'generateInvite']);
         Route::post('/join', [CircleController::class, 'joinCircle']);
         Route::get('/{circleId}/members', [CircleController::class, 'members']);

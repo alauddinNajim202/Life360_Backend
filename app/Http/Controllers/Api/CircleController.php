@@ -151,10 +151,12 @@ class CircleController extends Controller
 
     public function members($circleId)
     {
-        $circle = Circle::with('members')->findOrFail($circleId);
+        $circle = Circle::with(['members.latestLocation'])->findOrFail($circleId);
 
         // Get only needed fields for members
         $members = $circle->members->map(function ($member) {
+            $location = $member->latestLocation;
+
             return [
                 'id' => $member->id,
                 'name' => $member->name,
@@ -162,6 +164,8 @@ class CircleController extends Controller
                 'phone' => $member->phone,
                 'avatar' => $member->avatar,
                 'role' => $member->pivot->role,
+                'latitude' => $location ? (float) $location->latitude : null,
+                'longitude' => $location ? (float) $location->longitude : null,
                 'relation_tag' => $member->pivot->relation_tag,
                 'joined_at' => $member->pivot->joined_at,
             ];
@@ -173,6 +177,52 @@ class CircleController extends Controller
                 'circle' => $circle->name,
                 'members' => $members,
             ],
+            'code' => 200,
+            'success' => true,
+        ], 200);
+    }
+
+    public function allMembersLocation(Request $request)
+    {
+        $user = auth()->user();
+
+        $circlesQuery = $user->circles()->with(['members.latestLocation']);
+
+        if ($request->has('circle_id')) {
+            $circlesQuery->where('circles.id', $request->circle_id);
+        }
+
+        $circles = $circlesQuery->get();
+
+        $allMembers = collect();
+
+        foreach ($circles as $circle) {
+            foreach ($circle->members as $member) {
+                // Prevent duplicates if user is in multiple circles
+                if (! $allMembers->has($member->id)) {
+                    $location = $member->latestLocation;
+
+                    $allMembers->put($member->id, [
+                        'id' => $member->id,
+                        'name' => $member->name,
+                        'email' => $member->email,
+                        'phone' => $member->phone,
+                        'avatar' => $member->avatar,
+                        'latitude' => $location ? (float) $location->latitude : null,
+                        'longitude' => $location ? (float) $location->longitude : null,
+                        // Get circle-specific info from first matched circle
+                        'role' => $member->pivot->role,
+                        'relation_tag' => $member->pivot->relation_tag,
+                        'circle_id' => $circle->id,
+                        'circle_name' => $circle->name,
+                    ]);
+                }
+            }
+        }
+
+        return response()->json([
+            'message' => 'All members location fetched successfully',
+            'data' => $allMembers->values(),
             'code' => 200,
             'success' => true,
         ], 200);

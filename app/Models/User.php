@@ -195,4 +195,9 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(SafePlace::class, 'created_by');
     }
+
+    public function latestLocation()
+    {
+        return $this->hasOne(UserLocation::class)->latestOfMany();
+    }
 }
