@@ -12,7 +12,7 @@ class DashboardController extends Controller
 {
     public function __construct()
     {
-        View::share('crud', 'dashboard');
+        // View::share('crud', 'dashboard');
     }
 
     public function index()
@@ -82,7 +82,8 @@ class DashboardController extends Controller
 
         $recentProperties = \App\Models\Property::with('category')->orderBy('created_at', 'desc')->limit(6)->get();
 
-        return view('backend.layouts.dashboard', compact(
+        $crud = 'dashboard';
+        return view('backend.layouts.dashboard', compact('crud', 
             'userAnalytics',
             'growth',
             'recentUsers',
@@ -95,3 +96,5 @@ class DashboardController extends Controller
         ));
     }
 }
+
+
