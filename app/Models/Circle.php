@@ -11,17 +11,17 @@ class Circle extends Model
 
     protected $fillable = ['name', 'color_theme', 'icon', 'owner_id'];
 
-    public function getIconAttribute($value): ?string
-    {
-        if (filter_var($value, FILTER_VALIDATE_URL)) {
-            return $value;
-        }
-        if (request()->is('api/*') && ! empty($value)) {
-            return url($value);
-        }
+    // public function getIconAttribute($value): ?string
+    // {
+    //     if (filter_var($value, FILTER_VALIDATE_URL)) {
+    //         return $value;
+    //     }
+    //     if (request()->is('api/*') && ! empty($value)) {
+    //         return url($value);
+    //     }
 
-        return $value;
-    }
+    //     return $value;
+    // }
 
     public function owner()
     {
