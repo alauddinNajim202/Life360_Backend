@@ -135,7 +135,6 @@ Route::middleware(['auth:api'])
         Route::post('/join', [CircleController::class, 'joinCircle']);
         Route::get('/{circleId}/members', [CircleController::class, 'members']);
 
-        // নতুন API গুলো (আপনার প্রয়োজনীয় ৪টি)
         Route::post('/{circleId}/update', [CircleController::class, 'updateCircle']);
         Route::post('/{circleId}/leave', [CircleController::class, 'leaveCircle']);
         Route::post('/{circleId}/kick/{userId}', [CircleController::class, 'kickMember']);

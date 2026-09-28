@@ -183,7 +183,8 @@ class CircleController extends Controller
         $request->validate([
             'name' => 'nullable|string|max:255',
             'color_theme' => 'nullable|string',
-            'icon' => 'nullable|image|mimes:jpeg,png,jpg,gif',
+            // 'icon' => 'nullable|image|mimes:jpeg,png,jpg,gif',
+            'icon' => 'nullable|string',
         ]);
 
         $circle = Circle::findOrFail($circleId);
@@ -192,12 +193,16 @@ class CircleController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        if ($request->hasFile('icon')) {
-            $request->icon = Helper::fileUpload(
-                $request->file('icon'),
-                'circle',
-                getFileName($request->file('icon'))
-            );
+        // if ($request->hasFile('icon')) {
+        //     $request->icon = Helper::fileUpload(
+        //         $request->file('icon'),
+        //         'circle',
+        //         getFileName($request->file('icon'))
+        //     );
+        //     $circle->icon = $request->icon;
+        // }
+
+        if ($request->icon) {
             $circle->icon = $request->icon;
         }
 
