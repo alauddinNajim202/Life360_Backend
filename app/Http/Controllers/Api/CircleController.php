@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Api;
 
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
+use App\Mail\CircleInviteMail;
 use App\Models\Circle;
 use App\Models\CircleInvite;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class CircleController extends Controller
@@ -74,6 +76,7 @@ class CircleController extends Controller
         $request->validate([
             'circle_id' => 'required|exists:circles,id',
             'relation_tag' => 'required|string',
+            'email' => 'required|email',
         ]);
 
         $circle = Circle::findOrFail($request->circle_id);
@@ -93,6 +96,9 @@ class CircleController extends Controller
             'relation_tag' => $request->relation_tag,
             'expires_at' => now()->addHours(24),
         ]);
+
+        // Send email to the invited user
+        Mail::to($request->email)->send(new CircleInviteMail($circle->name, $code, auth()->user()->name));
 
         return response()->json([
             'data' => $invite,
