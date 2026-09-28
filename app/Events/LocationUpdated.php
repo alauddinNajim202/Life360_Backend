@@ -3,9 +3,7 @@
 namespace App\Events;
 
 use App\Models\UserLocation;
-use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
@@ -16,6 +14,7 @@ class LocationUpdated implements ShouldBroadcastNow
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $location;
+
     public $circleId;
 
     public function __construct(UserLocation $location, $circleId)
@@ -27,7 +26,7 @@ class LocationUpdated implements ShouldBroadcastNow
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('circle.' . $this->circleId),
+            new PrivateChannel('circle.'.$this->circleId),
         ];
     }
 

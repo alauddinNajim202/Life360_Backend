@@ -43,7 +43,7 @@ class CircleInviteMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            markdown: 'emails.circle.invite',
+            view: 'emails.circle.invite',
         );
     }
 

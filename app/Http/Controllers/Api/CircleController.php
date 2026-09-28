@@ -111,12 +111,12 @@ class CircleController extends Controller
     public function joinCircle(Request $request)
     {
         $request->validate([
-            'circle_id' => 'required|exists:circles,id',
+            // 'circle_id' => 'required|exists:circles,id',
             'invite_code' => 'required|string',
         ]);
 
         $invite = CircleInvite::where('invite_code', $request->invite_code)
-            ->where('circle_id', $request->circle_id)
+            // ->where('circle_id', $request->circle_id)
             ->where('is_used', false)
             ->where('expires_at', '>', now())
             ->first();
