@@ -17,19 +17,20 @@ class CircleController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'color_theme' => 'nullable|string',
-            'icon' => 'nullable|image|mimes:jpeg,png,jpg,gif',
+            // 'icon' => 'nullable|image|mimes:jpeg,png,jpg,gif',
+            'icon' => 'nullable|string',
         ]);
 
         $user = auth()->user();
 
-        if ($request->hasFile('icon')) {
+        // if ($request->hasFile('icon')) {
 
-            $request->icon = Helper::fileUpload(
-                $request->file('icon'),
-                'circle',
-                getFileName($request->file('icon'))
-            );
-        }
+        //     $request->icon = Helper::fileUpload(
+        //         $request->file('icon'),
+        //         'circle',
+        //         getFileName($request->file('icon'))
+        //     );
+        // }
 
         $circle = Circle::create([
             'name' => $request->name,
@@ -194,8 +195,12 @@ class CircleController extends Controller
             $circle->icon = $request->icon;
         }
 
-        if ($request->name) $circle->name = $request->name;
-        if ($request->color_theme) $circle->color_theme = $request->color_theme;
+        if ($request->name) {
+            $circle->name = $request->name;
+        }
+        if ($request->color_theme) {
+            $circle->color_theme = $request->color_theme;
+        }
 
         $circle->save();
 
@@ -216,7 +221,7 @@ class CircleController extends Controller
             return response()->json(['message' => 'Owner cannot leave the circle. Delete the circle instead.'], 400);
         }
 
-        if (!$circle->members()->where('user_id', $user->id)->exists()) {
+        if (! $circle->members()->where('user_id', $user->id)->exists()) {
             return response()->json(['message' => 'You are not a member of this circle'], 400);
         }
 
@@ -237,11 +242,11 @@ class CircleController extends Controller
             return response()->json(['message' => 'Only the owner can kick members'], 403);
         }
 
-        if ((int)$userId === auth()->id()) {
+        if ((int) $userId === auth()->id()) {
             return response()->json(['message' => 'You cannot kick yourself'], 400);
         }
 
-        if (!$circle->members()->where('user_id', $userId)->exists()) {
+        if (! $circle->members()->where('user_id', $userId)->exists()) {
             return response()->json(['message' => 'User is not a member of this circle'], 400);
         }
 
