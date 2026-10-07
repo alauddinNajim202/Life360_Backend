@@ -17,6 +17,15 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
+            # Check if docker is installed, if not, install it automatically
+            if ! command -v docker &> /dev/null; then
+              echo "Docker not found. Installing Docker and Docker Compose..."
+              sudo apt-get update
+              sudo apt-get install -y docker.io docker-compose-v2
+              sudo systemctl start docker
+              sudo systemctl enable docker
+            fi
+
             # Navigate to the project directory
             cd ${{ secrets.PROJECT_PATH }} || exit 1
             
@@ -28,20 +37,20 @@ jobs:
             git pull origin main
             
             # Free up space by removing unused docker images and cache
-            docker system prune -af
+            sudo docker system prune -af
             
             # Rebuild the Docker image and start the container
-            docker compose up -d --build
+            sudo docker compose up -d --build
             
             # Wait 15 seconds for MySQL database to fully boot up
             sleep 15
             
             # Debug: Check if db container is running and check its logs
-            docker compose ps
-            docker compose logs db
+            sudo docker compose ps
+            sudo docker compose logs db
             
             # Clear caches before migration to load new .env variables
-            docker compose exec -T app php artisan optimize:clear
+            sudo docker compose exec -T app php artisan optimize:clear
             
             # Run database migrations
-            docker compose exec -T app php artisan migrate --force
+            sudo docker compose exec -T app php artisan migrate --force
