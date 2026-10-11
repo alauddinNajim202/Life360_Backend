@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\Frontend\SubcategoryController;
 use App\Http\Controllers\Api\LocationController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\PropertyController;
+use App\Http\Controllers\Api\RevenueWebhookController;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
 
@@ -147,3 +148,6 @@ Route::get('/verify-email-link',
     [ResetPasswordController::class, 'verifyEmailLink'])
     ->name('verify.email.link')
     ->middleware('signed');
+
+
+Route::post('webhook/endpoint' , [RevenueWebhookController::class, 'handleWebhook']);

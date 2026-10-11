@@ -54,6 +54,10 @@ return [
         'key_id' => env('APPLE_KEY_ID'),
         'private_key_path' => env('APPLE_PRIVATE_KEY_PATH'),
         'redirect' => env('APPLE_REDIRECT_URI'),
-    ]
+    ],
+
+    'revenuecat' => [
+        'webhook_secret' => env('REVENUECAT_WEBHOOK_SECRET'),
+    ],
 
 ];
