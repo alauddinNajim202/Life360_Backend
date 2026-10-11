@@ -20,14 +20,27 @@ class UserController extends Controller
     public function __construct()
     {
         parent::__construct();
-        $this->select = ['id', 'name', 'phone', 'email', 'avatar'];
+        $this->select = ['id', 'name', 'phone', 'email', 'avatar', 'product_id', 'package', 'is_subscribed', 'revenuecat_id', 'status'];
     }
 
     public function me()
     {
         $user = User::select($this->select)->find(auth('api')->user()->id);
 
-        return Helper::jsonResponse(true, 'User details fetched successfully', 200, $user);
+        return Helper::jsonResponse(true, 'User details fetched successfully', 200, [
+            'id'            => $user->id,
+            'name'          => $user->name,
+            'email'         => $user->email,
+            'phone'         => $user->phone,
+            'avatar'        => $user->avatar,
+            'status'        => $user->status,
+            'subscription'  => [
+                'is_subscribed'  => (bool) $user->is_subscribed,
+                'package'        => $user->package,
+                'product_id'     => $user->product_id,
+                'revenuecat_id'  => $user->revenuecat_id,
+            ],
+        ]);
     }
 
     public function updateProfile(Request $request)
