@@ -54,8 +54,26 @@ class RevenueWebhookController extends Controller
             return response()->json(['message' => 'User not found'], 404);
         }
 
-        $productId = $event['product_id'] ?? null;
+        $productId    = $event['product_id'] ?? null;
         $newProductId = $event['new_product_id'] ?? null;
+        $entitlementIds = $event['entitlement_ids'] ?? [];
+        $entitlementId  = !empty($entitlementIds) ? $entitlementIds[0] : null;
+
+        // Extract expiry and purchase dates from subscriber entitlements
+        $subscriber = $request->input('subscriber') ?? [];
+        $entitlementExpiry   = null;
+        $entitlementPurchase = null;
+        if ($entitlementId && isset($subscriber['entitlements'][$entitlementId])) {
+            $ent = $subscriber['entitlements'][$entitlementId];
+            $entitlementExpiry   = $ent['expires_date'] ?? null;
+            $entitlementPurchase = $ent['purchase_date'] ?? null;
+        }
+        // Fallback: use event-level expiry if available
+        if (!$entitlementExpiry) {
+            $entitlementExpiry = $event['expiration_at_ms']
+                ? \Carbon\Carbon::createFromTimestampMs($event['expiration_at_ms'])
+                : null;
+        }
 
         $getPackage = function ($id) {
             if (!$id) return null;
@@ -67,28 +85,55 @@ class RevenueWebhookController extends Controller
         switch ($eventType) {
             case 'INITIAL_PURCHASE':
             case 'RENEWAL':
-                $user->product_id = $productId;
-                $user->package = $getPackage($productId);
-                $user->revenuecat_id = $event['app_user_id'] ?? null;
-                $user->is_subscribed = true;
+                $user->product_id                = $productId;
+                $user->package                   = $getPackage($productId);
+                $user->revenuecat_id             = $event['app_user_id'] ?? null;
+                $user->is_subscribed             = true;
+                $user->subscription_status       = 'active';
+                $user->entitlement_id            = $entitlementId;
+                $user->subscription_expires_at   = $entitlementExpiry;
+                $user->subscription_purchased_at = $entitlementPurchase;
+                $user->subscription_event        = $eventType;
                 break;
 
             case 'PRODUCT_CHANGE':
-                $user->product_id = $newProductId;
-                $user->package = $getPackage($newProductId);
-                $user->revenuecat_id = $event['app_user_id'] ?? null;
-                $user->is_subscribed = true;
+                $user->product_id                = $newProductId;
+                $user->package                   = $getPackage($newProductId);
+                $user->revenuecat_id             = $event['app_user_id'] ?? null;
+                $user->is_subscribed             = true;
+                $user->subscription_status       = 'active';
+                $user->entitlement_id            = $entitlementId;
+                $user->subscription_expires_at   = $entitlementExpiry;
+                $user->subscription_purchased_at = $entitlementPurchase;
+                $user->subscription_event        = $eventType;
                 break;
 
             case 'CANCELLATION':
+                $user->is_subscribed             = false;
+                $user->subscription_status       = 'cancelled';
+                $user->subscription_event        = $eventType;
+                // Keep product_id, package, expiry so app knows when access ends
+                $user->subscription_expires_at   = $entitlementExpiry;
+                break;
+
             case 'EXPIRATION':
-                $user->product_id = null;
-                $user->package = null;
-                $user->is_subscribed = false;
+                $user->product_id                = null;
+                $user->package                   = null;
+                $user->is_subscribed             = false;
+                $user->subscription_status       = 'expired';
+                $user->entitlement_id            = null;
+                $user->subscription_expires_at   = null;
+                $user->subscription_event        = $eventType;
+                break;
+
+            case 'BILLING_ISSUE':
+                $user->subscription_status = 'billing_issue';
+                $user->subscription_event  = $eventType;
                 break;
 
             case 'TRANSFER':
                 Log::info("User {$userId} subscription transferred.");
+                $user->subscription_event = $eventType;
                 break;
 
             default:

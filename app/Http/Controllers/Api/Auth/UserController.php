@@ -20,7 +20,11 @@ class UserController extends Controller
     public function __construct()
     {
         parent::__construct();
-        $this->select = ['id', 'name', 'phone', 'email', 'avatar', 'product_id', 'package', 'is_subscribed', 'revenuecat_id', 'status'];
+        $this->select = ['id', 'name', 'phone', 'email', 'avatar', 'status',
+            'product_id', 'package', 'is_subscribed', 'revenuecat_id',
+            'subscription_status', 'entitlement_id',
+            'subscription_expires_at', 'subscription_purchased_at', 'subscription_event'
+        ];
     }
 
     public function me()
@@ -35,10 +39,15 @@ class UserController extends Controller
             'avatar'        => $user->avatar,
             'status'        => $user->status,
             'subscription'  => [
-                'is_subscribed'  => (bool) $user->is_subscribed,
-                'package'        => $user->package,
-                'product_id'     => $user->product_id,
-                'revenuecat_id'  => $user->revenuecat_id,
+                'is_subscribed'    => (bool) $user->is_subscribed,
+                'status'           => $user->subscription_status,    // active | cancelled | expired | billing_issue
+                'package'          => $user->package,                // monthly | yearly
+                'product_id'       => $user->product_id,
+                'entitlement_id'   => $user->entitlement_id,
+                'expires_at'       => $user->subscription_expires_at,
+                'purchased_at'     => $user->subscription_purchased_at,
+                'last_event'       => $user->subscription_event,     // INITIAL_PURCHASE | RENEWAL | CANCELLATION | etc.
+                'revenuecat_id'    => $user->revenuecat_id,
             ],
         ]);
     }
