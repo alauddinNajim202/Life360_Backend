@@ -63,16 +63,14 @@ class CircleController extends Controller
 
         $user = auth()->user();
 
-        $query = $user->circles()->with(['members' => function ($q) {
-            $q->select('users.id', 'users.name', 'users.email', 'users.phone', 'users.avatar');
-        }]);
+        $query = $user->circles()->withCount('members');
 
         if ($request->has('status')) {
             $query->where('circles.status', $request->status);
         }
 
         $circles = $query->get()->map(function ($circle) use ($user) {
-            $myRole = $circle->pivot->role ?? ($circle->owner_id === $user->id ? 'admin' : 'member');
+            $role = $circle->pivot->role ?? ($circle->owner_id === $user->id ? 'admin' : 'member');
 
             return [
                 'id' => $circle->id,
@@ -81,24 +79,11 @@ class CircleController extends Controller
                 'icon' => $circle->icon,
                 'owner_id' => $circle->owner_id,
                 'status' => $circle->status,
-                'role' => $myRole,
-                'my_role' => $myRole,
+                'role' => $role,
                 'is_owner' => $circle->owner_id === $user->id,
-                'my_relation_tag' => $circle->pivot->relation_tag ?? null,
+                'relation_tag' => $circle->pivot->relation_tag ?? null,
                 'joined_at' => $circle->pivot->joined_at ?? null,
-                'total_members' => $circle->members->count(),
-                'members' => $circle->members->map(function ($member) {
-                    return [
-                        'id' => $member->id,
-                        'name' => $member->name,
-                        'email' => $member->email,
-                        'phone' => $member->phone,
-                        'avatar' => $member->avatar,
-                        'role' => $member->pivot->role ?? 'member',
-                        'relation_tag' => $member->pivot->relation_tag ?? null,
-                        'joined_at' => $member->pivot->joined_at ?? null,
-                    ];
-                }),
+                'total_members' => $circle->members_count,
                 'created_at' => $circle->created_at,
                 'updated_at' => $circle->updated_at,
             ];
