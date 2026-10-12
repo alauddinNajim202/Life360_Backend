@@ -183,7 +183,7 @@ class User extends Authenticatable implements JWTSubject
 
     public function circles()
     {
-        return $this->belongsToMany(Circle::class)->withPivot('role', 'joined_at');
+        return $this->belongsToMany(Circle::class)->withPivot('role', 'relation_tag', 'joined_at');
     }
 
     public function journeys()
