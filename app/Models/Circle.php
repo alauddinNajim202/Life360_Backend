@@ -9,7 +9,7 @@ class Circle extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'color_theme', 'icon', 'owner_id'];
+    protected $fillable = ['name', 'color_theme', 'icon', 'owner_id', 'status'];
 
     // public function getIconAttribute($value): ?string
     // {

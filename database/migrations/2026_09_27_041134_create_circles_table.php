@@ -13,6 +13,7 @@ return new class extends Migration {
             $table->string('color_theme')->default('#000000');
             $table->string('icon')->nullable();
             $table->foreignId('owner_id')->constrained('users')->onDelete('cascade');
+            $table->enum('status', ['active', 'inactive'])->default('active');
             $table->timestamps();
         });
     }
