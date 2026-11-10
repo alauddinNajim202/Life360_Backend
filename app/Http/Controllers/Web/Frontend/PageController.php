@@ -13,25 +13,28 @@ class PageController extends Controller
     {
         $this->theme = env('THEME');
     }
-    
+
     public function index($slug)
     {
         $page = Page::where('slug', $slug)->firstOrFail();
         return view("frontend.{$this->theme}.layouts.page", compact('page'));
     }
 
-     public function privacyPolicy()
+    public function privacyPolicy()
     {
         $privacy = Page::where('slug', 'privacy-policy')
             ->where('status', 'active')
             ->first();
-  
 
         return view('frontend.default.privacy_policy', compact('privacy'));
     }
 
+    public function termsAndConditions()
+    {
+        $terms = Page::where('slug', 'terms-and-conditions')
+            ->where('status', 'active')
+            ->first();
 
-
-
-
+        return view('frontend.default.privacy_policy', compact('terms'));
+    }
 }
