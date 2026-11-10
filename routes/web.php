@@ -31,7 +31,7 @@ Route::controller(NotificationController::class)->prefix('notification')->name('
 })->middleware('auth');
 
 Route::get('/privacy-policy', [PageController::class, 'privacyPolicy'])->name('privacy.policy');
-Route::get('/terms-and-conditions', [PageController::class, 'termsAndConditions'])->name('terms.conditions');
+Route::get('/terms-of-services', [PageController::class, 'termsAndConditions'])->name('terms.conditions');
 
 
 use App\Http\Controllers\Web\Frontend\UserController;
