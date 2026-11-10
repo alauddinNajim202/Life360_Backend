@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Privacy Policy - {{ config('app.name', 'App') }}</title>
+    <title>{{ isset($privacy) ? $privacy->title : 'Privacy Policy' }} - {{ config('app.name', 'App') }}</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Phosphor Icons for modern sleek icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -429,8 +429,14 @@
         <div class="hero-icon">
             <i class="ph ph-shield-check"></i>
         </div>
-        <h1>Privacy Policy</h1>
-        <p class="subtitle">We're committed to protecting your privacy and ensuring transparency about how we collect, use, and safeguard your personal information.</p>
+        <h1>{{ isset($privacy) ? $privacy->title : 'Privacy Policy' }}</h1>
+        <p class="subtitle">
+            @if(isset($privacy) && $privacy->slug === 'terms-of-services')
+                Please read these terms carefully before using Stay Close – Family Tracker.
+            @else
+                We're committed to protecting your privacy and ensuring transparency about how we collect, use, and safeguard your personal information.
+            @endif
+        </p>
         @if(isset($privacy))
         <p class="last-updated">Last updated: {{ $privacy->updated_at ? $privacy->updated_at->format('F j, Y') : date('F j, Y') }}</p>
         @endif
