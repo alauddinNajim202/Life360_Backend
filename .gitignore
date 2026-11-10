@@ -19,3 +19,4 @@ yarn-error.log
 /.zed
 /public/uploads
 config.bat
+/.env

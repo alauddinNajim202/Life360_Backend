@@ -137,7 +137,7 @@ Go to Profile → Settings → Delete Account. This permanently removes all your
             ],
             [
                 "name"    => "Terms and Conditions",
-                "slug"    => "terms-and-conditions",
+                "slug"    => "terms-of-services",
                 "title"   => "Terms and Conditions – Stay Close Family Tracker",
                 "content" => "
 <h2>Terms and Conditions</h2>

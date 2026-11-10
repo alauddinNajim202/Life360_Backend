@@ -31,10 +31,11 @@ class PageController extends Controller
 
     public function termsAndConditions()
     {
-        $terms = Page::where('slug', 'terms-and-conditions')
+        // Use same variable name ($privacy) so the shared view works without changes
+        $privacy = Page::where('slug', 'terms-of-services')
             ->where('status', 'active')
             ->first();
 
-        return view('frontend.default.privacy_policy', compact('terms'));
+        return view('frontend.default.privacy_policy', compact('privacy'));
     }
 }
