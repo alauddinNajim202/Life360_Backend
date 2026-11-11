@@ -13,18 +13,20 @@ class LocationController extends Controller
     public function update(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'latitude' => 'required|numeric',
-            'longitude' => 'required|numeric',
-            'speed' => 'nullable|numeric',
-            'heading' => 'nullable|numeric',
+            'latitude'      => 'required|numeric',
+            'longitude'     => 'required|numeric',
+            'speed'         => 'nullable|numeric',
+            'heading'       => 'nullable|numeric',
+            'battery_level' => 'nullable|integer|min:0|max:100',
+            'is_charging'   => 'nullable|boolean',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
-                'status' => false,
-                'code' => 422,
+                'status'  => false,
+                'code'    => 422,
                 'message' => 'Validation failed',
-                'errors' => $validator->errors(),
+                'errors'  => $validator->errors(),
             ], 422);
         }
 
@@ -32,11 +34,13 @@ class LocationController extends Controller
 
         // Create new location entry
         $location = UserLocation::create([
-            'user_id' => $user->id,
-            'latitude' => $request->latitude,
-            'longitude' => $request->longitude,
-            'speed' => $request->speed,
-            'heading' => $request->heading,
+            'user_id'       => $user->id,
+            'latitude'      => $request->latitude,
+            'longitude'     => $request->longitude,
+            'speed'         => $request->speed,
+            'heading'       => $request->heading,
+            'battery_level' => $request->battery_level,
+            'is_charging'   => $request->boolean('is_charging', false),
         ]);
 
         // Get all active circles of the user
@@ -48,12 +52,14 @@ class LocationController extends Controller
         }
 
         return response()->json([
-            'status' => true,
-            'code' => 200,
+            'status'  => true,
+            'code'    => 200,
             'message' => 'Location updated and broadcasted successfully',
-            'data' => [
-                'latitude' => $location->latitude,
-                'longitude' => $location->longitude,
+            'data'    => [
+                'latitude'      => $location->latitude,
+                'longitude'     => $location->longitude,
+                'battery_level' => $location->battery_level,
+                'is_charging'   => (bool) $location->is_charging,
             ]
         ], 200);
     }
