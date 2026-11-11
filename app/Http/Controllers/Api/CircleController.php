@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\CircleStatusChanged;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Mail\CircleInviteMail;
@@ -139,6 +140,9 @@ class CircleController extends Controller
 
                     $circle->update(['status' => $item['status']]);
                     $updated[] = $circle->fresh();
+
+                    // Broadcast to all circle members in real-time
+                    broadcast(new CircleStatusChanged($circle->id, $item['status'], $user->id));
                 }
             }
         }
@@ -159,6 +163,9 @@ class CircleController extends Controller
 
                     $circle->update(['status' => $request->status]);
                     $updated[] = $circle->fresh();
+
+                    // Broadcast to all circle members in real-time
+                    broadcast(new CircleStatusChanged($circle->id, $request->status, $user->id));
                 }
             }
         }
@@ -181,6 +188,9 @@ class CircleController extends Controller
 
                 $circle->update(['status' => $request->status]);
                 $updated[] = $circle->fresh();
+
+                // Broadcast to all circle members in real-time
+                broadcast(new CircleStatusChanged($circle->id, $request->status, $user->id));
             }
         }
 
