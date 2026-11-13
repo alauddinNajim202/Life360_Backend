@@ -43,8 +43,10 @@ class LocationController extends Controller
             'is_charging'   => $request->boolean('is_charging', false),
         ]);
 
-        // Get all active circles of the user (use circles.id to be explicit)
-        $circles = $user->circles()->pluck('circles.id');
+        // Get all active circles of the user (both memberships and owned circles)
+        $memberCircleIds = $user->circles()->pluck('circles.id');
+        $ownedCircleIds  = \App\Models\Circle::where('owner_id', $user->id)->pluck('id');
+        $circles         = $memberCircleIds->merge($ownedCircleIds)->unique();
 
         // Broadcast to each circle the user belongs to
         foreach ($circles as $circleId) {

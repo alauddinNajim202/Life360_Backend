@@ -12,15 +12,29 @@ class CircleStatusChanged implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $circleId;
-    public $status;   // 'active' | 'inactive'
-    public $updatedBy; // owner user_id
+    public $data;
+    public $circle_id;
+    public $status;
+    public $updated_by;
+    public $updated_at;
+
+    protected $circleId;
 
     public function __construct($circleId, $status, $updatedBy)
     {
-        $this->circleId  = (int) $circleId;
-        $this->status    = (string) $status;
-        $this->updatedBy = (int) $updatedBy;
+        $this->circleId   = $circleId;
+        $this->circle_id  = (int) $circleId;
+        $this->status     = (string) $status;
+        $this->updated_by = (int) $updatedBy;
+        $this->updated_at = now()->toISOString();
+
+        // MessageSendEvent এর মতো public $data
+        $this->data = [
+            'circle_id'  => $this->circle_id,
+            'status'     => $this->status,
+            'updated_by' => $this->updated_by,
+            'updated_at' => $this->updated_at,
+        ];
     }
 
     public function broadcastOn(): array
@@ -29,20 +43,4 @@ class CircleStatusChanged implements ShouldBroadcastNow
             new PrivateChannel('circle.' . $this->circleId),
         ];
     }
-
-    public function broadcastAs(): string
-    {
-        return 'circle.status.changed';
-    }
-
-    public function broadcastWith(): array
-    {
-        return [
-            'circle_id'  => $this->circleId,
-            'status'     => $this->status,       // 'active' | 'inactive'
-            'updated_by' => $this->updatedBy,
-            'updated_at' => now()->toISOString(),
-        ];
-    }
 }
-

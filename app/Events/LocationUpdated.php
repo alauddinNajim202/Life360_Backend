@@ -13,34 +13,47 @@ class LocationUpdated implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $location;
+    public $data;
+    public $user_id;
+    public $latitude;
+    public $longitude;
+    public $speed;
+    public $heading;
+    public $battery_level;
+    public $is_charging;
+    public $updated_at;
 
-    public $circleId;
+    protected $circleId;
 
     public function __construct(UserLocation $location, $circleId)
     {
-        $this->location = $location;
-        $this->circleId = $circleId;
+        $this->circleId      = $circleId;
+        $this->user_id       = $location->user_id;
+        $this->latitude      = $location->latitude;
+        $this->longitude     = $location->longitude;
+        $this->speed         = $location->speed;
+        $this->heading       = $location->heading;
+        $this->battery_level = $location->battery_level;
+        $this->is_charging   = (bool) $location->is_charging;
+        $this->updated_at    = $location->created_at;
+
+        // MessageSendEvent এর মতো public $data
+        $this->data = [
+            'user_id'       => $this->user_id,
+            'latitude'      => $this->latitude,
+            'longitude'     => $this->longitude,
+            'speed'         => $this->speed,
+            'heading'       => $this->heading,
+            'battery_level' => $this->battery_level,
+            'is_charging'   => $this->is_charging,
+            'updated_at'    => $this->updated_at,
+        ];
     }
 
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('circle.'.$this->circleId),
-        ];
-    }
-
-    public function broadcastWith(): array
-    {
-        return [
-            'user_id'       => $this->location->user_id,
-            'latitude'      => $this->location->latitude,
-            'longitude'     => $this->location->longitude,
-            'speed'         => $this->location->speed,
-            'heading'       => $this->location->heading,
-            'battery_level' => $this->location->battery_level,
-            'is_charging'   => (bool) $this->location->is_charging,
-            'updated_at'    => $this->location->created_at,
+            new PrivateChannel('circle.' . $this->circleId),
         ];
     }
 }
