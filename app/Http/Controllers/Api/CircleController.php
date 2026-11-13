@@ -351,6 +351,7 @@ class CircleController extends Controller
                         'avatar' => $member->avatar,
                         'latitude' => $location ? (float) $location->latitude : null,
                         'longitude' => $location ? (float) $location->longitude : null,
+                        'battery_level' => $location ? $location->battery_level : null,
                         // Get circle-specific info from first matched circle
                         'role' => $member->pivot->role,
                         'relation_tag' => $member->pivot->relation_tag,
