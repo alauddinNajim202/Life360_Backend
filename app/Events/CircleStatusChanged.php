@@ -12,15 +12,15 @@ class CircleStatusChanged implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public int    $circleId;
-    public string $status;   // 'active' | 'inactive'
-    public int    $updatedBy; // owner user_id
+    public $circleId;
+    public $status;   // 'active' | 'inactive'
+    public $updatedBy; // owner user_id
 
-    public function __construct(int $circleId, string $status, int $updatedBy)
+    public function __construct($circleId, $status, $updatedBy)
     {
-        $this->circleId  = $circleId;
-        $this->status    = $status;
-        $this->updatedBy = $updatedBy;
+        $this->circleId  = (int) $circleId;
+        $this->status    = (string) $status;
+        $this->updatedBy = (int) $updatedBy;
     }
 
     public function broadcastOn(): array

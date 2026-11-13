@@ -33,6 +33,6 @@ Broadcast::channel('chat-sender.{sender_id}', function ($user, $sender_id) {
     return (int) $user->id === (int) $sender_id;
 });
 Broadcast::channel('circle.{id}', function ($user, $id) {
-    // Check if the user is a member of the circle
-    return $user->circles()->where('circle_id', $id)->exists();
+    return $user->circles()->where('circles.id', $id)->exists()
+        || \App\Models\Circle::where('id', $id)->where('owner_id', $user->id)->exists();
 });

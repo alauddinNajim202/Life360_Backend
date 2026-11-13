@@ -407,6 +407,8 @@ class CircleController extends Controller
         }
         if ($request->has('status')) {
             $circle->status = $request->status;
+            // Broadcast status change to members
+            broadcast(new CircleStatusChanged($circle->id, $circle->status, auth()->id()));
         }
 
         $circle->save();
