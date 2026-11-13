@@ -33,12 +33,14 @@ class LocationUpdated implements ShouldBroadcastNow
     public function broadcastWith(): array
     {
         return [
-            'user_id' => $this->location->user_id,
-            'latitude' => $this->location->latitude,
-            'longitude' => $this->location->longitude,
-            'speed' => $this->location->speed,
-            'heading' => $this->location->heading,
-            'updated_at' => $this->location->created_at,
+            'user_id'       => $this->location->user_id,
+            'latitude'      => $this->location->latitude,
+            'longitude'     => $this->location->longitude,
+            'speed'         => $this->location->speed,
+            'heading'       => $this->location->heading,
+            'battery_level' => $this->location->battery_level,
+            'is_charging'   => (bool) $this->location->is_charging,
+            'updated_at'    => $this->location->created_at,
         ];
     }
 }
