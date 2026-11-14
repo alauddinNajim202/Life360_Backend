@@ -32,6 +32,13 @@ Route::controller(NotificationController::class)->prefix('notification')->name('
 
 Route::get('/privacy-policy', [PageController::class, 'privacyPolicy'])->name('privacy.policy');
 Route::get('/terms-of-services', [PageController::class, 'termsAndConditions'])->name('terms.conditions');
+Route::get('/app-ads.txt', function () {
+    $path = public_path('app-ads.txt');
+    if (file_exists($path)) {
+        return response()->file($path, ['Content-Type' => 'text/plain; charset=UTF-8']);
+    }
+    return response("google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0\n", 200, ['Content-Type' => 'text/plain; charset=UTF-8']);
+});
 
 
 use App\Http\Controllers\Web\Frontend\UserController;
